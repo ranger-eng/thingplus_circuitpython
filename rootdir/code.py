@@ -19,11 +19,37 @@ advertisement = ProvideServicesAdvertisement(service)
 # setup sensors
 import board
 import analogio
+import busio
+import iorodeo_as7331
 
 # Measure analog moisture levels
 # Initialize analog input pins
 analog_A0 = analogio.AnalogIn(board.PA0)
 analog_A4 = analogio.AnalogIn(board.PA4)
+comm_port = busio.I2C(board.PD0, board.PD1)
+
+while not comm_port.try_lock():
+    pass
+
+print("I2C addresses found:", [hex(address) for address in comm_port.scan()])
+
+comm_port.unlock()
+
+sensor = iorodeo_as7331.AS7331(comm_port, 0x74)
+
+sensor.gain = iorodeo_as7331.GAIN_512X
+sensor.integration_time = iorodeo_as7331.INTEGRATION_TIME_128MS
+
+print(f'chip id:            {sensor.chip_id}')
+print(f'device state:       {sensor.device_state_as_string}')
+print(f'gain_as_string:     {sensor.gain_as_string}')
+print(f'integration_time:   {sensor.integration_time_as_string}')
+print(f'divider enabled:    {sensor.divider_enabled}')
+print(f'divider:            {sensor.divider}')
+print(f'power_down_enable:  {sensor.power_down_enable}')
+print(f'standby state:      {sensor.standby_state}')
+print(f'gain:               {sensor.gain_as_string}')
+print('-'*60)
 
 def get_voltage(pin):
     """Convert raw ADC reading to voltage (0 - 3.3V)"""
@@ -33,6 +59,12 @@ def clear_screen():
     """Clears the terminal output"""
     print("\033[2J\033[H", end="")
 
+def read_register(register):
+    """Reads a single byte from the specified register."""
+    with i2c_device as device:
+        device.write_then_readinto(bytes([register]), buffer)
+        return buffer[0]
+
 # Main loop to read and print analog values
 while True:
     raw_A0 = analog_A0.value  # Raw ADC value (0-65535)
@@ -40,10 +72,12 @@ while True:
 
     raw_A4 = analog_A4.value  # Raw ADC value (0-65535)
     voltage_A4 = get_voltage(analog_A4)  # Convert to voltage
+    uva, uvb, uvc, temp = sensor.values
 
-    print(f"A0: {raw_A0} ({voltage_A0:.2f}V), A4: {raw_A4} ({voltage_A4:.2f}V)")
-    time.sleep(.1)  # Wait 1 second before next reading
     clear_screen()
+    print(f"A0: {raw_A0} ({voltage_A0:.2f}V), A4: {raw_A4} ({voltage_A4:.2f}V)")
+    print(f"UVA: {uva:.2f}, UVB: {uvb:.2f}, UVC: {uvc:.2f}, TEMP: {temp:.2f}")
+    time.sleep(.1)  # Wait 1 second before next reading
 
 # Function to get some fake weather sensor readings for this example in the desired unit.
 def measure(unit):
