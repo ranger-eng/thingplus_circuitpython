@@ -16,13 +16,14 @@ ble = BLERadio()
 service = SensorService()
 advertisement = ProvideServicesAdvertisement(service)
 
+
 # Function to get some fake weather sensor readings for this example in the desired unit.
 def measure(unit):
     temperature = random.uniform(0.0, 10.0)
     humidity = random.uniform(0.0, 100.0)
     if unit == "fahrenheit":
         temperature = (temperature * 9.0 / 5.0) + 32.0
-    return {"timestamp": time.monotonic(),"temperature": temperature, "humidity": humidity}
+    return {"temperature": temperature, "humidity": humidity}
 
 
 # Advertise until another device connects, when a device connects, provide sensor data.
@@ -30,7 +31,6 @@ while True:
     print("Advertise services")
     ble.stop_advertising()  # you need to do this to stop any persistent old advertisement
     ble.start_advertising(advertisement)
-    print(advertisement.match_prefixes)
 
     print("Waiting for connection...")
     while not ble.connected:
