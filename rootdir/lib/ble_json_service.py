@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2020 Mark Raleson
+#
 # SPDX-License-Identifier: MIT
 
 # Read sensor readings from peripheral BLE device using a JSON characteristic.

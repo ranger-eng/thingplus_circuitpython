@@ -1,0 +1,15 @@
+{
+  "root": "./",
+  "include": [
+    "adafruit-circuitpython-bundle-9.x-mpy-20250307/**",
+    "rootdir",
+    "rootdir/lib"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "typings": ["typings"],  // Ensure Pyright knows about custom types if you have them
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false
+}
