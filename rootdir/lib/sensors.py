@@ -30,6 +30,6 @@ class MoistureSensor(analogio.AnalogIn):
     rail_voltage = 3.3
     num_ADC_vals = 65535 # 16-bit ADC resolution
 
-    def getVoltage(self):
-        """Get voltage value from sensor"""
+    def getValue(self):
+        """Get value from sensor"""
         return (self.value * self.rail_voltage / self.num_ADC_vals)

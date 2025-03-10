@@ -10,12 +10,17 @@ from ble_json_service import SensorService
 from adafruit_ble import BLERadio
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 
+import board
+from sensors import UVSensor
+from sensors import MoistureSensor
 
 # Create BLE radio, custom service, and advertisement.
 ble = BLERadio()
 service = SensorService()
 advertisement = ProvideServicesAdvertisement(service)
 
+moist_sens1 = MoistureSensor(board.PA0)
+moist_sens2 = MoistureSensor(board.PA4)
 
 # Function to get some fake weather sensor readings for this example in the desired unit.
 def measure(unit):
@@ -25,9 +30,16 @@ def measure(unit):
         temperature = (temperature * 9.0 / 5.0) + 32.0
     return {"temperature": temperature, "humidity": humidity}
 
+def measure_sensors():
+    moist1_val = moist_sens1.getValue()
+    moist2_val = moist_sens2.getValue()
+    return {"moist1_volts": moist1_val, "moist2_volts": moist2_val}
 
 # Advertise until another device connects, when a device connects, provide sensor data.
 while True:
+    
+    print("Sensors: ", measure_sensors())
+
     print("Advertise services")
     ble.stop_advertising()  # you need to do this to stop any persistent old advertisement
     ble.start_advertising(advertisement)
