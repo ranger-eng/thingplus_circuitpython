@@ -47,7 +47,6 @@ while True:
         settings = service.settings
         measurement = measure_sensors()
         service.sensors = measurement
-        print("Settings: ", settings)
         print("Sensors: ", measurement)
         time.sleep(0.25)
 
