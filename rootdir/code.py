@@ -30,7 +30,9 @@ def measure_sensors():
     moist1_val = moist1_sens.getValue()
     moist2_val = moist2_sens.getValue()
     uva, uvb, uvc, temp = uv_sens.values
-    return {"moist1_volts": moist1_val, "moist2_volts": moist2_val, "uva": uva, "uvb": uvb, "uvc": uvc, "air_temp_C": temp}
+    sensor_data_dict = {"moist1": moist1_val, "moist2": moist2_val, "uva": uva, "uvb": uvb, "uvc": uvc, "air_temp": temp}
+    sensor_unit_dict = {"moist1": "V", "moist2": "V", "uva": "%", "uvb": "%", "uvc": "%", "air_temp": "C"}
+    return {"sensor_data": sensor_data_dict, "sensor_unit": sensor_unit_dict}
 
 # Advertise until another device connects, when a device connects, provide sensor data.
 while True:
