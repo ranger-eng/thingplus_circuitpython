@@ -7,8 +7,8 @@ class UVSensor(iorodeo_as7331.AS7331):
     def __init__(self, i2c_bus, address):
         super().__init__(i2c_bus, address)
 
-        self.gain = iorodeo_as7331.GAIN_512X
-        self.integration_time = iorodeo_as7331.INTEGRATION_TIME_128MS
+        self.gain = iorodeo_as7331.GAIN_2048X
+        self.integration_time = iorodeo_as7331.INTEGRATION_TIME_1024MS
 
         print(f'chip id:            {self.chip_id}')
         print(f'device state:       {self.device_state_as_string}')
