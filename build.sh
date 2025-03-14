@@ -3,6 +3,6 @@
 ttydevice=$(ls /dev/tty.usbmodem*)
 
 mpremote fs cp --force ./rootdir/* :
-(ampy -p $ttydevice ls /lib | sed 's|^/|:|' | xargs -I {} mpremote fs rm {})
 mpremote fs cp --force ./rootdir/lib/* :lib
+mpremote fs cp --force ./adafruit_seesaw/* :lib/adafruit_seesaw
 mpremote exec --no-follow "import microcontroller; microcontroller.reset()"

@@ -14,6 +14,7 @@ import board
 import busio
 from mysensors import MoistureSensor
 from mysensors import UVSensor
+from mysensors import SoilTempAndMoistureSensor
 
 # Create BLE radio, custom service, and advertisement.
 ble = BLERadio()
@@ -22,16 +23,18 @@ advertisement = ProvideServicesAdvertisement(service)
 
 # Create sensor objects
 moist1_sens = MoistureSensor(board.PA0)
-moist2_sens = MoistureSensor(board.PA4)
 comm_port = busio.I2C(board.PD0, board.PD1)
 uv_sens = UVSensor(comm_port, 0x74)
+soil_sens = SoilTempAndMoistureSensor(comm_port, 0x36)
 
 def measure_sensors():
-    moist1_val = moist1_sens.getValue()
-    moist2_val = moist2_sens.getValue()
-    uva, uvb, uvc, temp = uv_sens.values
-    sensor_data_dict = {"moist1": moist1_val, "moist2": moist2_val, "uva": uva, "air_temp": temp}
-    sensor_unit_dict = {"moist1": "V", "moist2": "V", "uva": "%", "air_temp": "C"}
+    soil_temp_val = soil_sens.getFTemp()
+    uva = uv_sens.getUvaPercentage()
+    temp = uv_sens.getFTemp()
+    moisture_val = moist1_sens.getMoistPercentage()
+
+    sensor_data_dict = {"moist": moisture_val, "uva": uva, "air_temp": temp, "soil_temp": soil_temp_val}
+    sensor_unit_dict = {"moist": "%", "uva": "%", "air_temp": "F", "soil_temp": "F"}
     return {"sensor_data": sensor_data_dict, "sensor_units": sensor_unit_dict}
 
 # Advertise until another device connects, when a device connects, provide sensor data.
@@ -39,7 +42,7 @@ while True:
     print("Advertise services")
     ble.stop_advertising()  # you need to do this to stop any persistent old advertisement
     ble.start_advertising(advertisement)
-
+   
     print("Waiting for connection...")
     while not ble.connected:
         pass
