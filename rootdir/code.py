@@ -16,16 +16,38 @@ from mysensors import MoistureSensor
 from mysensors import UVSensor
 from mysensors import SoilTempAndMoistureSensor
 
+def scanI2C(comm_port):
+    while not comm_port.try_lock():
+        pass  # Wait until I2C bus is available
+
+    try:
+        addresses = comm_port.scan()  # Get list of I2C device addresses
+        if addresses:
+            print("Found I2C devices at addresses:")
+            for address in addresses:
+                print(f"0x{address:02X}")  # Print address in hex format
+        else:
+            print("No I2C devices found.")
+    finally:
+        comm_port.unlock()  # Release I2C bus
+
 # Create BLE radio, custom service, and advertisement.
 ble = BLERadio()
 service = SensorService()
 advertisement = ProvideServicesAdvertisement(service)
 
+print(ble.tx_power)
+
 # Create sensor objects
 moist1_sens = MoistureSensor(board.PA0)
-comm_port = busio.I2C(board.PD0, board.PD1)
-uv_sens = UVSensor(comm_port, 0x74)
-soil_sens = SoilTempAndMoistureSensor(comm_port, 0x36)
+comm_port1 = busio.I2C(board.PD0, board.PD1)
+
+scanI2C(comm_port1)
+
+uv_sens = UVSensor(comm_port1, 0x74)
+soil_sens = SoilTempAndMoistureSensor(comm_port1, 0x36)
+
+UPDATE_INTERVAL_S = 1.3*60
 
 def measure_sensors():
     soil_temp_val = soil_sens.getFTemp()
@@ -41,7 +63,7 @@ def measure_sensors():
 while True:
     print("Advertise services")
     ble.stop_advertising()  # you need to do this to stop any persistent old advertisement
-    ble.start_advertising(advertisement)
+    ble.start_advertising(advertisement, None, .5)
    
     print("Waiting for connection...")
     while not ble.connected:
@@ -53,6 +75,6 @@ while True:
         measurement = measure_sensors()
         service.sensors = measurement
         print("Sensors: ", measurement)
-        time.sleep(0.25)
+        time.sleep(UPDATE_INTERVAL_S)
 
     print("Disconnected")
